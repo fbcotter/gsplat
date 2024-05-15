@@ -47,7 +47,8 @@ sources = list(glob.glob(os.path.join(PATH, "csrc/*.cu"))) + list(
 
 try:
     # try to import the compiled module (via setup.py)
-    from gsplat2 import csrc as _C
+    from gsplat.experimental.cuda import csrc as _C
+    #  from gsplat2 import csrc as _C
 except ImportError:
     # if failed, try with JIT compilation
     if cuda_toolkit_available():

@@ -22,14 +22,12 @@ def get_ext():
     return BuildExtension.with_options(no_python_abi_suffix=True, use_ninja=False)
 
 
-def get_extensions():
+def get_extension(extensions_dir="gsplat/cuda/csrc", name="gsplat.csrc"):
     import torch
     from torch.__config__ import parallel_info
     from torch.utils.cpp_extension import CUDAExtension
 
-    extensions_dir = osp.join("gsplat", "cuda", "csrc")
-    sources = glob.glob(osp.join(extensions_dir, "*.cu")) + glob.glob(
-        osp.join(extensions_dir, "*.cpp")
+    sources = glob.glob(osp.join(extensions_dir, "*.cu")) + glob.glob(osp.join(extensions_dir, "*.cpp")
     )
     # sources = [
     #     osp.join(extensions_dir, "ext.cpp"),
@@ -88,16 +86,17 @@ def get_extensions():
         extra_compile_args["nvcc"] += ["-DWIN32_LEAN_AND_MEAN"]
 
     extension = CUDAExtension(
-        f"gsplat.csrc",
+        name,
         sources,
-        include_dirs=[osp.join(extensions_dir, "third_party", "glm")],
+        include_dirs=["/home/fergal/WayveCode/wayve/ai/nvs/3rdparty/build/gsplat/gsplat/cuda/csrc/third_party"],
+        #  include_dirs=[osp.join(extensions_dir, "third_party", "glm")],
         define_macros=define_macros,
         undef_macros=undef_macros,
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
     )
 
-    return [extension]
+    return extension
 
 
 setup(
@@ -129,7 +128,10 @@ setup(
             "ninja",
         ],
     },
-    ext_modules=get_extensions() if not BUILD_NO_CUDA else [],
+    ext_modules=[
+        get_extension("gsplat/cuda/csrc", "gsplat.mycsrc"),
+        get_extension("gsplat/experimental/cuda/csrc", "gsplat.experimental.cuda.csrc"),
+    ] if not BUILD_NO_CUDA else [],
     cmdclass={"build_ext": get_ext()} if not BUILD_NO_CUDA else {},
     packages=find_packages(),
     # https://github.com/pypa/setuptools/issues/1461#issuecomment-954725244
